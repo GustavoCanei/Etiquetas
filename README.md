@@ -8,6 +8,7 @@ Este projeto é um aplicativo em Python para gerar etiquetas em PDF, com interfa
 - Sistema operacional Windows (recomendado)
 
 ## Instalação dos pacotes
+
 Abra o PowerShell na pasta do projeto e execute:
 
 ```
@@ -15,6 +16,7 @@ pip install pandas pillow reportlab python-barcode
 ```
 
 ## Como usar
+
 1. Execute o arquivo `Gerador.py`:
    ```
    python Gerador.py
@@ -23,8 +25,10 @@ pip install pandas pillow reportlab python-barcode
 3. Clique em "Gerar PDF" para salvar as etiquetas.
 
 ## Observações
+
 - O arquivo `clients.json` pode ser usado para mapear clientes a logos (opcional).
 - Para importar dados de etiquetas, use a função "Buscar Excel" e selecione um arquivo `.xlsx` ou `.xls`.
 
 ## Suporte
+
 Em caso de dúvidas ou problemas, entre em contato com o desenvolvedor.

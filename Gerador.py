@@ -34,7 +34,7 @@ class EtiquetaApp(tk.Tk):
         self.subbrand_text = "MADE IN BRAZIL"
 
         # Variáveis de controle
-        self.total_var      = tk.IntVar(value=15)
+        self.total_var      = tk.IntVar(value=17)
         self.use_groups_var = tk.BooleanVar(value=False)
         self.group1_count   = tk.IntVar(value=8)
 
@@ -68,35 +68,63 @@ class EtiquetaApp(tk.Tk):
     def _build_ui(self):
         frm = ttk.LabelFrame(self, text="Configurações")
         frm.grid(row=0, column=0, padx=10, pady=10, sticky='nw')
+        # Tutorial no topo do painel de configurações
+        lbl_tutorial = ttk.Label(
+            frm,
+            text="Tutorial:\n1. Preencha os campos abaixo.\n2. Clique em 'Gerar PDF'.\n3. O arquivo será salvo na pasta escolhida.",
+            foreground="#2176ae",
+            font=("Helvetica", 10),
+            justify='left',
+            anchor='w'
+        )
+        lbl_tutorial.grid(row=0, column=0, columnspan=2, pady=(2,8), sticky='w')
+        # Os campos começam na linha 1
+        row_offset = 1
         prw = ttk.LabelFrame(self, text="Pré-visualização")
         prw.grid(row=0, column=1, padx=10, pady=10)
-        # Mensagem de aviso acima do canvas
-        lbl_preview_warn = ttk.Label(prw, text="Apenas uma simples pré-visualização, terá pequenas alterações quando gerada no PDF!", foreground="#a67c00", font=("Helvetica", 9, "italic"))
-        lbl_preview_warn.grid(row=0, column=0, columnspan=2, pady=(0,5))
+        # Mensagem de aviso acima do preview (centralizado, cor discreta)
+        lbl_preview_warn = ttk.Label(
+            prw,
+            text="Apenas uma pré-visualização simples. O resultado final pode ter pequenas diferenças no PDF!",
+            foreground="#a67c00",
+            font=("Helvetica", 9, "italic"),
+            justify='center',
+            anchor='center'
+        )
+        lbl_preview_warn.grid(row=0, column=0, columnspan=2, pady=(8,10), sticky='ew')
 
         # Controles gerais
-        ttk.Label(frm, text="Total etiquetas:").grid(row=0, column=0, sticky='e')
-        Spinbox(frm, from_=1, to=100, textvariable=self.total_var, width=5).grid(row=0, column=1)
+        ttk.Label(frm, text="Total etiquetas:").grid(row=row_offset, column=0, sticky='e', pady=(0,4))
+        Spinbox(frm, from_=1, to=17, textvariable=self.total_var, width=5).grid(row=row_offset, column=1, pady=(0,4))
         ttk.Checkbutton(frm, text="Usar 2 grupos", variable=self.use_groups_var,
-                        command=self._toggle_groups).grid(row=1, column=0, columnspan=2)
-        ttk.Label(frm, text="Qtd grupo 1:").grid(row=2, column=0, sticky='e')
+                        command=self._toggle_groups).grid(row=row_offset+1, column=0, columnspan=2, pady=(0,6))
+        # Campo Qtd grupo 1 destacado, em linha separada
+        self.lbl_qtd = ttk.Label(frm, text="Qtd grupo 1:", foreground="#000000", font=("Helvetica", 10, "bold"))
         self.spin1 = Spinbox(frm, from_=1, to=99, textvariable=self.group1_count, width=5)
-        self.spin1.grid(row=2, column=1)
+        grupo_row = row_offset+2
+        self.lbl_qtd.grid(row=grupo_row, column=0, sticky='e', pady=(0,8))
+        self.spin1.grid(row=grupo_row, column=1, pady=(0,8))
+        self.lbl_qtd.grid_remove()
+        self.spin1.grid_remove()
 
         # Grupos
+        next_row = grupo_row+1
         self.g1 = ttk.LabelFrame(frm, text="Grupo 1")
-        self.g1.grid(row=3, column=0, columnspan=2, pady=5, sticky='ew')
+        self.g1.grid(row=next_row, column=0, columnspan=2, pady=5, sticky='ew')
         self._entry_group(self.g1, 1)
+        next_row += 1
         self.g2 = ttk.LabelFrame(frm, text="Grupo 2")
-        self.g2.grid(row=4, column=0, columnspan=2, pady=5, sticky='ew')
+        self.g2.grid(row=next_row, column=0, columnspan=2, pady=5, sticky='ew')
         self._entry_group(self.g2, 2)
+        next_row += 1
 
         # Pasta e botões
-        ttk.Button(frm, text="Salvar em...", command=self._choose_folder).grid(row=5, column=0, pady=5)
+        ttk.Button(frm, text="Salvar em...", command=self._choose_folder).grid(row=next_row, column=0, pady=5)
         self.lbl_folder = ttk.Label(frm, text=self.output_dir, width=30, anchor='w')
-        self.lbl_folder.grid(row=5, column=1, pady=5)
+        self.lbl_folder.grid(row=next_row, column=1, pady=5)
+        next_row += 1
         bf = ttk.Frame(frm)
-        bf.grid(row=6, column=0, columnspan=2, pady=10)
+        bf.grid(row=next_row, column=0, columnspan=2, pady=10)
         ttk.Button(bf, text="Gerar PDF", command=self.on_generate).pack(side='left', padx=5)
         ttk.Button(bf, text="Sair", command=self.destroy).pack(side='left')
 
@@ -150,9 +178,17 @@ class EtiquetaApp(tk.Tk):
 
     def _toggle_groups(self):
         if self.use_groups_var.get():
-            self.g2.grid(); self.spin1.config(state='normal'); self.canvas2.grid()
+            self.g2.grid()
+            self.spin1.config(state='normal')
+            self.lbl_qtd.grid()
+            self.spin1.grid()
+            self.canvas2.grid()
         else:
-            self.g2.grid_remove(); self.spin1.config(state='disabled'); self.canvas2.grid_remove()
+            self.g2.grid_remove()
+            self.spin1.config(state='disabled')
+            self.lbl_qtd.grid_remove()
+            self.spin1.grid_remove()
+            self.canvas2.grid_remove()
         self._update_group_spin()
         self._draw_previews()
 
@@ -164,6 +200,8 @@ class EtiquetaApp(tk.Tk):
 
     def _update_group_spin(self):
         m = max(1, self.total_var.get()-1)
+        # Força sempre 17
+        m = 16
         self.spin1.config(to=m)
         if self.group1_count.get() > m:
             self.group1_count.set(m)
@@ -299,7 +337,7 @@ class EtiquetaApp(tk.Tk):
         self._generate_pdf()
 
     def _generate_pdf(self):
-        total = self.total_var.get()
+        total = 17
         g1    = self.group1_count.get() if self.use_groups_var.get() else total
         out   = os.path.join(self.output_dir, 'etiquetas.pdf')
         c     = pdf_canvas.Canvas(out, pagesize=A4)
@@ -309,19 +347,28 @@ class EtiquetaApp(tk.Tk):
         cols, rows_per = 5, 3
         ml, mt, gh, gv = 13*mm, 12*mm, 3*mm, 3*mm
         bw, bh, maxw, rot = 0.6*mm, 10*mm, 47*mm, 90
-        # Verticais
-        # ...existing code...
-        # Verticais
-        for idx in range(total):
-            grp = 1 if idx < g1 else 2
+        # Nova lógica: total de etiquetas = 17
+        # Qtd grupo 1 = g1, o restante é grupo 2
+        # Distribui tipo: primeiro verticais, depois horizontais
+        hor_w, hor_h = 74*mm, 34*mm
+        gap = 3*mm
+        verticais_base_y = A4[1] - mt - rows_per*slot_h - (rows_per-1)*gv
+        hor_y = verticais_base_y - hor_h - gap
+        total_w = 2*hor_w + gap
+        start_x = (A4[0]-total_w)/2
+        # Sempre gera 2 horizontais, o resto verticais
+        n_horizontais = 2
+        n_verticais = 15
+        # Grupos: primeiros g1 etiquetas são grupo 1, o resto grupo 2
+        grupos = [1]*g1 + [2]*(17-g1)
+        # Verticais (primeiros n_verticais)
+        for idx in range(n_verticais):
+            grp = grupos[idx]
             hdr,pce,dte,tme,cds = [getattr(self, f'{nm}{grp}_var').get() for nm in ('header','piece','date','time','code')]
             is_daf = hdr.strip().upper().startswith('DAF')
             is_iveco = hdr.strip().upper().startswith('IVECO')
             logo_h_mm = 12*mm if (is_daf or is_iveco) else 6*mm
             logo_w_mm = 12*mm if (is_daf or is_iveco) else 6*mm
-        for idx in range(total):
-            grp = 1 if idx < g1 else 2
-            hdr,pce,dte,tme,cds = [getattr(self, f'{nm}{grp}_var').get() for nm in ('header','piece','date','time','code')]
             col, row = idx % cols, idx // cols
             if row >= rows_per:
                 c.showPage()
@@ -332,33 +379,29 @@ class EtiquetaApp(tk.Tk):
             c.translate(x0+slot_w/2, y0+slot_h/2)
             c.rotate(rot)
             c.translate(-et_w/2, -et_h/2)
-            # Logo no PDF
-            logo = self.logo_paths.get(grp)
+            if not self.use_groups_var.get():
+                logo = self.logo_paths.get(1)
+            else:
+                logo = self.logo_paths.get(grp)
             logo_drawn = False
             logo_y = et_h-5*mm-logo_h_mm
             hdr_y = et_h-5*mm
-            # Verifica se é DAF (ignora espaços, variações, etc)
-            is_daf = hdr.strip().upper().startswith('DAF')
             if (is_daf or is_iveco):
-                hdr_x = 2*mm + logo_w_mm  # sem espaço extra
+                hdr_x = 2*mm + logo_w_mm
             else:
-                hdr_x = 2*mm + logo_w_mm + 1*mm  # 1mm de espaço após logo
+                hdr_x = 2*mm + logo_w_mm + 1*mm
             if logo and os.path.exists(logo):
                 orig = Image.open(logo).convert('RGBA')
-                # Compor sobre branco puro, eliminando qualquer pixel parcialmente transparente
                 white_bg = Image.new('RGBA', orig.size, (255,255,255,255))
                 white_bg.paste(orig, mask=orig.split()[3])
                 arr = white_bg.getdata()
                 new_arr = [(r,g,b,255) if a==255 else (255,255,255,255) for (r,g,b,a) in arr]
                 white_bg.putdata(new_arr)
-                # Converte para RGB antes de redimensionar (elimina canal alfa)
                 rgb_logo = white_bg.convert('RGB')
-                # Calcula tamanho em pixels para 300 DPI
                 dpi = 300
                 mm_to_inch = 1/25.4
                 px_w = int(logo_w_mm * mm_to_inch * dpi)
                 px_h = int(logo_h_mm * mm_to_inch * dpi)
-                # Redimensiona mantendo proporção, igual ao preview
                 w, h = rgb_logo.size
                 scale = min(px_w/w, px_h/h)
                 new_h = max(1, int(h * scale))
@@ -366,18 +409,15 @@ class EtiquetaApp(tk.Tk):
                 logo_img = rgb_logo.resize((new_w, new_h), Image.LANCZOS)
                 y_logo = hdr_y - logo_h_mm/2
                 c.drawInlineImage(logo_img, 2*mm, y_logo, width=logo_w_mm, height=logo_h_mm)
-            # Só desenha nome do cliente se não for DAF ou IVECO
             if not (is_daf or is_iveco):
                 c.setFont('Helvetica-Bold',12)
                 c.drawString(hdr_x, hdr_y, hdr)
-            # Se for DAF ou IVECO, joga a peça e SHROUD mais pra esquerda
             if is_daf or is_iveco:
                 pce_x = 2*mm
             else:
                 pce_x = hdr_x
             c.setFont('Helvetica',8);       c.drawString(pce_x, et_h-12*mm, pce)
             c.setFont('Helvetica-Bold',8);  c.drawString(pce_x, et_h-16*mm, 'SHROUD')
-            # Centraliza marca e subtexto juntos no topo direito, igual às horizontais
             c.setFont('Helvetica-Bold',9)
             brand_w = c.stringWidth(self.brand_text, 'Helvetica-Bold', 9)
             c.setFont('Helvetica',7)
@@ -385,14 +425,13 @@ class EtiquetaApp(tk.Tk):
             max_w = max(brand_w, subbrand_w)
             center_x = et_w-5*mm - max_w/2
             brand_y = et_h-7*mm
-            subbrand_y = brand_y - 9  # 9 pts abaixo (aprox. 2mm)
+            subbrand_y = brand_y - 9
             c.setFont('Helvetica-Bold',9)
             c.drawCentredString(center_x, brand_y, self.brand_text)
             c.setFont('Helvetica',7)
             c.drawCentredString(center_x, subbrand_y, self.subbrand_text)
             c.setFont('Helvetica-Bold',7.5); c.drawString(2*mm, et_h-23*mm, f'DATA: {dte}')
             c.drawString(2*mm, et_h-28*mm, f'HORA: {tme}')
-            # Barcode
             bc = code128.Code128(str(cds), barHeight=bh, barWidth=bw)
             scale = min(1.0, maxw/bc.width)
             bc_w, bc_h = bc.width*scale, bh
@@ -404,17 +443,10 @@ class EtiquetaApp(tk.Tk):
             c.restoreState()
             c.setFont('Helvetica-Bold',7.5); c.drawCentredString(bc_x+bc_w/2, bc_y+bc_h+2*mm, cds)
             c.restoreState()
-        # Horizontais
-        hor_w, hor_h = 74*mm, 34*mm
-        gap = 3*mm
-        # Ajusta para que as horizontais fiquem 3mm abaixo das verticais
-        verticais_base_y = A4[1] - mt - rows_per*slot_h - (rows_per-1)*gv
-        hor_y = verticais_base_y - hor_h - gap
-        total_w = 2*hor_w + gap
-        start_x = (A4[0]-total_w)/2
-        for i in (0,1):
-            # Se não usar 2 grupos, sempre usa grupo 1
-            grp = 1 if not self.use_groups_var.get() else (1 if i==0 else 2)
+        # Horizontais (sempre os últimos 2)
+        for idx in range(n_verticais, n_verticais + n_horizontais):
+            i = idx - n_verticais
+            grp = grupos[idx]
             hdr,pce,dte,tme,cds = [getattr(self, f'{nm}{grp}_var').get() for nm in ('header','piece','date','time','code')]
             is_daf = hdr.strip().upper().startswith('DAF')
             is_iveco = hdr.strip().upper().startswith('IVECO')
@@ -425,29 +457,22 @@ class EtiquetaApp(tk.Tk):
             logo = self.logo_paths.get(grp)
             ox_mm = x+2*mm
             hdr_y = hor_y+hor_h-5*mm
-            # Verifica se é DAF ou IVECO
             if (is_daf or is_iveco):
-                # Se for DAF ou IVECO, não desenha nome do cliente, só a logo
-                hdr_x = ox_mm + logo_w_mm  # sem espaço extra
+                hdr_x = ox_mm + logo_w_mm
             else:
-                hdr_x = ox_mm + logo_w_mm + 1*mm  # 1mm de espaço após logo
-            # Sempre reserva espaço do logo
+                hdr_x = ox_mm + logo_w_mm + 1*mm
             if logo and os.path.exists(logo):
                 orig = Image.open(logo).convert('RGBA')
-                # Compor sobre branco puro, eliminando qualquer pixel parcialmente transparente
                 white_bg = Image.new('RGBA', orig.size, (255,255,255,255))
                 white_bg.paste(orig, mask=orig.split()[3])
                 arr = white_bg.getdata()
                 new_arr = [(r,g,b,255) if a==255 else (255,255,255,255) for (r,g,b,a) in arr]
                 white_bg.putdata(new_arr)
-                # Converte para RGB antes de redimensionar (elimina canal alfa)
                 rgb_logo = white_bg.convert('RGB')
-                # Calcula tamanho em pixels para 300 DPI
                 dpi = 300
                 mm_to_inch = 1/25.4
                 px_w = int(logo_w_mm * mm_to_inch * dpi)
                 px_h = int(logo_h_mm * mm_to_inch * dpi)
-                # Redimensiona mantendo proporção
                 w, h = rgb_logo.size
                 scale = min(px_w/w, px_h/h)
                 new_w = max(1, int(w * scale))
@@ -455,30 +480,21 @@ class EtiquetaApp(tk.Tk):
                 logo_img = rgb_logo.resize((new_w, new_h), Image.LANCZOS)
                 y_logo = hdr_y - logo_h_mm/2
                 c.drawInlineImage(logo_img, ox_mm, y_logo, width=logo_w_mm, height=logo_h_mm)
-            else:
-                pass  # espaço do logo já reservado por ox_mm e logo_w_mm
-            # Só desenha nome do cliente se não for DAF ou IVECO
             if not (is_daf or is_iveco):
                 c.setFont('Helvetica-Bold',12)
                 c.drawString(hdr_x, hdr_y, hdr)
-            # Centraliza marca e subtexto juntos no topo direito
-            # Calcula largura dos textos
             c.setFont('Helvetica-Bold',9)
             brand_w = c.stringWidth(self.brand_text, 'Helvetica-Bold', 9)
             c.setFont('Helvetica',7)
             subbrand_w = c.stringWidth(self.subbrand_text, 'Helvetica', 7)
             max_w = max(brand_w, subbrand_w)
-            # Posição X centralizada em relação ao topo direito
             center_x = x+hor_w-5*mm - max_w/2
-            # Posição Y do topo
             brand_y = hor_y+hor_h-7*mm
-            subbrand_y = brand_y - 9  # 9 pts abaixo (aprox. 2mm)
+            subbrand_y = brand_y - 9
             c.setFont('Helvetica-Bold',9)
             c.drawCentredString(center_x, brand_y, self.brand_text)
             c.setFont('Helvetica',7)
             c.drawCentredString(center_x, subbrand_y, self.subbrand_text)
-            # Número da peça e SHROUD mais próximos do topo
-            # Se for DAF ou IVECO, joga a peça e SHROUD mais pra esquerda
             if is_daf or is_iveco:
                 pce_x = x+2*mm
             else:
@@ -487,7 +503,6 @@ class EtiquetaApp(tk.Tk):
             c.setFont('Helvetica-Bold',8); c.drawString(pce_x, hor_y+hor_h-16*mm, 'SHROUD')
             c.setFont('Helvetica-Bold',7.5); c.drawString(x+2*mm, hor_y+hor_h-23*mm, f'DATA: {dte}')
             c.drawString(x+2*mm, hor_y+hor_h-28*mm, f'HORA: {tme}')
-            # Barcode
             bc = code128.Code128(str(cds), barHeight=bh, barWidth=bw)
             scale = min(1.0, maxw/bc.width)
             bc_w, bc_h = bc.width*scale, bh
